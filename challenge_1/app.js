@@ -120,6 +120,19 @@ var findColumnWin = function() {
   }
 }
 
+var checkForTie = function(){
+  var tie = false;
+  for (let r = 0; r < boardArr.length; r++) {
+    if (!boardArr[r].includes(0)) {
+      tie = true;
+    } else {
+      tie = false;
+      break;
+    }
+  }
+  return tie;
+}
+
 var checkForWin = function() {
   let winner = findColumnWin() || findDiagonalWin() || findRowWin();
   let board = document.getElementById('board');
@@ -130,8 +143,14 @@ var checkForWin = function() {
     let winnerDiv = document.createElement('div');
     winnerDiv.innerHTML = `<h1>Player ${winner} wins!!!</h1>`
     board.appendChild(winnerDiv);
+  } else if (checkForTie()){
+    while (board.firstchild){
+      board.removeChild(board.firstchild);
+    }
+    let tieDiv = document.createElement('div');
+    tieDiv.innerHTML = `<h1>It's a tie!!!</h1>`
+    board.appendChild(tieDiv);
   }
-  
 }
 
 //check for win ^^^^
