@@ -1,8 +1,14 @@
 //variables
+var flexContainer = document.createElement('div');
+flexContainer.className = 'flexContainer';
+document.body.appendChild(flexContainer);
+var h1 = document.createElement('h1');
+h1.innerHTML = '<h1>Tic-Tac-Toe</h1>';
+flexContainer.appendChild(h1);
 var board = document.createElement('div');
-board.style = 'width: 150px; height: 165px';
+board.style = 'width: 245px; height: 200px';
 board.id = 'board';
-document.body.appendChild(board);
+flexContainer.appendChild(board);
 //MVC STYLE
 var turn = false;
 //false === X, true === O;
@@ -11,6 +17,7 @@ var turn = false;
   //document.addeventlistener(event.type, listener, )
 
 //find row win
+
 
 var createBoard = function(){
   let board = [];
@@ -34,6 +41,7 @@ var loadBoard = function(){
   var table = document.createElement('table');
   for (let r =0; r< boardArr.length; r++){
     var row = document.createElement('tr');
+    row.className = 'tableRow';
     for (let c = 0; c < boardArr[r].length; c++){
       // let space = document.createElement('div');
       var td = document.createElement('td');
@@ -43,11 +51,11 @@ var loadBoard = function(){
       if (boardArr[r][c] === 0){
         td.className = 'space empty'
       } else if (boardArr[r][c] === 'X') {
-        td.innerHTML = 'X';
+        td.innerHTML = '<p>X</p>';
       } else {
-        td.innerHTML = 'O';
+        td.innerHTML = '<p>O</p>';
       }
-      td.style = 'width: 50px; height: 50px; border: solid; margin: 0px';
+      td.style = 'width: 80px; height: 80px';
       row.appendChild(td);
     }
     board.appendChild(row);
@@ -100,6 +108,27 @@ var findDiagonalWin = function(){
   }
 }
 
+var findCrossDiagonalWin = function() {
+  var counterX = 0;
+  var counterY = 0;
+  for (let r = boardArr.length - 1; r > 0;) {
+    for (let c = 0; c < 3;) {
+      if (boardArr[r][c] === 'X') {
+        counterX++;
+      } else if (boardArr[r][c] === 'O'){
+        counterY++;
+      }
+      if (counterX === 3) {
+        return 'X';
+      } else if (counterY === 3){
+        return 'O';
+      }
+      r -= 1;
+      c += 1;
+    }
+  }
+}
+
 //find column win
 var findColumnWin = function() {
   for (let r = 0; r < boardArr.length; r++) {
@@ -134,7 +163,7 @@ var checkForTie = function(){
 }
 
 var checkForWin = function() {
-  let winner = findColumnWin() || findDiagonalWin() || findRowWin();
+  let winner = findColumnWin() || findDiagonalWin() || findRowWin() || findCrossDiagonalWin();
   let board = document.getElementById('board');
   if (winner) {
     while (board.firstchild){
@@ -169,14 +198,14 @@ board.addEventListener('click', function(event) {
 });
 
 var button = document.createElement('button');
-button.style = 'margin: 10px; width: 50px; height: 20px';
+button.style = 'margin: 75px; width: 50px; height: 20px';
 button.innerHTML = 'Reset'
 button.addEventListener('click', function(event){
   boardArr = createBoard();
   loadBoard();
   console.log('clicked!!!')
 })
-document.body.appendChild(button);
+flexContainer.appendChild(button);
 
 
 // document.onload(createBoard());
