@@ -1,6 +1,6 @@
 //variables
 var board = document.createElement('div');
-board.style = 'width: 150px; height: 150px';
+board.style = 'width: 150px; height: 165px';
 board.id = 'board';
 document.body.appendChild(board);
 //MVC STYLE
@@ -9,9 +9,11 @@ var turn = false;
 //board --> Data to implement and change board;
   //MODEL
   //document.addeventlistener(event.type, listener, )
-let boardArr = [];
+
+//find row win
 
 var createBoard = function(){
+  let board = [];
   for (let r = 0 ; r< 3; r++){
     board.push([])
     for (let c = 0; c < 3; c++){
@@ -20,7 +22,7 @@ var createBoard = function(){
   }
   return board;
 };
-var boardArr = createBoard;
+var boardArr = createBoard();
 
 //CONTROLLER / VIEW
 var handleClick = function(event){
@@ -54,7 +56,88 @@ var loadBoard = function(){
 loadBoard();
 
 
-board.addEventListener('click', function(event){
+//BEGIN WIN CHECKER FUNCTIONS VVVVVV
+
+var findRowWin = function(){
+  for (let r = 0; r<boardArr.length; r++){
+    var counterX = 0;
+    var counterY = 0;
+    for (let c=0;c<boardArr[r].length; c++){
+      if (boardArr[r][c] === 'O'){
+        counterY++;
+      } else if (boardArr[r][c] === 'X'){
+        counterX++;
+      }
+      if (counterX === 3) {
+        return 'X';
+      } else if (counterY === 3){
+        return 'O';
+      }
+    }
+  }
+}
+
+//find diagonal win
+var findDiagonalWin = function(){
+  var counterX = 0;
+  var counterY = 0;
+  for (let r = 0; r < boardArr.length;) {
+    for (let c = 0; c < boardArr.length;) {
+      if (boardArr[r][c] === 'X') {
+        counterX++;
+      } else if (boardArr[r][c] === 'O'){
+        counterY++;
+      }
+      if (counterX === 3) {
+        return 'X';
+      } else if (counterY === 3){
+        return 'O';
+      }
+      r += 1;
+      c += 1;
+      console.log('R', r, 'C', c)
+    }
+  }
+}
+
+//find column win
+var findColumnWin = function() {
+  for (let r = 0; r < boardArr.length; r++) {
+    var counterX = 0;
+    var counterY = 0;
+    for (let c = 0; c < boardArr.length; c++) {
+      if (boardArr[c][r] === 'O'){
+          counterY++;
+      } else if (boardArr[c][r] === 'X') {
+          counterX++;
+        }
+    }
+    if (counterX === 3) {
+      return 'X';
+    } else if (counterY === 3){
+      return 'O';
+    }
+  }
+}
+
+var checkForWin = function() {
+  let winner = findColumnWin() || findDiagonalWin() || findRowWin();
+  let board = document.getElementById('board');
+  if (winner) {
+    while (board.firstchild){
+      board.removeChild(board.firstchild);
+    }
+    let winnerDiv = document.createElement('div');
+    winnerDiv.innerHTML = `<h1>Player ${winner} wins!!!</h1>`
+    board.appendChild(winnerDiv);
+  }
+  
+}
+
+//check for win ^^^^
+
+
+board.addEventListener('click', function(event) {
   let coordinate = event.target.id.split('');
   var letter = turn ? 'O' : 'X';
   let boardArrAtCoordinate = boardArr[coordinate[0]][coordinate[1]];
@@ -62,12 +145,15 @@ board.addEventListener('click', function(event){
     boardArr[coordinate[0]][coordinate[1]] = letter;
     turn = !turn;
     loadBoard();
+    checkForWin();
   }
 });
 
 var button = document.createElement('button');
+button.style = 'margin: 10px; width: 50px; height: 20px';
+button.innerHTML = 'Reset'
 button.addEventListener('click', function(event){
-  boardArr();
+  boardArr = createBoard();
   loadBoard();
   console.log('clicked!!!')
 })
