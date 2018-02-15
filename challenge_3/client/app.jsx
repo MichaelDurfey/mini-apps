@@ -7,7 +7,8 @@ class App extends React.Component {
     super();
     this.state = {
       board: [],
-      currentPiece: true
+      currentPiece: true,
+      message: 'Game on!'
     }
   }
 
@@ -18,8 +19,10 @@ class App extends React.Component {
   checkForWin(){
     //check for row win
     let winner = this.checkForRowWin() || this.checkForColumnWin() || this.checkForCrossDiagonalWin() || this.checkForDiagonalWin();
-    if (winner) {document.getElementsByClassName('boardView').appendChild(`winner is ${winner}!!`) };
-    // console.log(this.checkForCrossDiagonalWin());
+    if (winner) {
+      this.setState({message: `${winner} wins!!`})
+    };
+    console.log(this.checkForRowWin());
   
     //check for column win
     //check for diagonal win
@@ -31,52 +34,35 @@ class App extends React.Component {
   }
 
   checkForCrossDiagonalWin() {
-    // for (let i = 0; i < this.state.board.length;) { 
-    //   let redCounter = 0;
-    //   let blackCounter = 0;
-    //   for (let n = -4; n < 13;){
-    //     if (n >= 0 && n <= 9 && i <= this.state.board.length) {
-    //       if (this.state.board[i][n] === true) {
-    //         redCounter++;
-    //       } else if (this.state.board[i][n] === false) {
-    //         blackCounter++;
-    //       }
-    //       if (redCounter === 4) {
-    //         return 'Red';
-    //       } else if (blackCounter === 4) {
-    //         return "Black";
-    //       }
-    //       i++;
-    //       n++;
-    //     }
-    //   }
-    // }
+    let board = this.state.board;
+    for (let row = 0; row < board.length - 3; row++) {
+      for (let col = 3; col < board[row].length; col++) {
+        if (board[row][col] !== null && board[row][col] === board[row+1][col-1] === board[row+2][col-2] === board[row+3][col-3]) {
+          if (board[row][col] ) {
+            return 'Red';
+          } else if (board[row][col] === false) {
+            return 'Black';
+          }
+        }
+      }
+    }
     return false;
   }
 
   checkForDiagonalWin() {
-    // let redCounter = 0;
-    // let blackCounter = 0;
-    // let x = 0;
-    //   while ( x < 11){
-    //   for (let i = 0; i < 6;) {
-    //     for (let n = -4; n < 13; n++) {
-    //       console.log(i, n)
-    //       if (this.state.board[i][n] !== undefined && this.state.board[i][n] === true){
-    //         redCounter++;
-    //       } else if (this.state.board[i][n] !== undefined && this.state.board[i][n] === false) {
-    //         blackCounter++;
-    //       }
-    //       i++;
-    //     }
-    //     if (redCounter === 4) {
-    //       return 'Red';
-    //     } else if (blackCounter === 4) {
-    //       return "Black";
-    //     }
-    //   }
-    //   x++;
-    // }
+    let board = this.state.board;
+    for (let row = 0; row < board.length - 3; row++) {
+      for (let col = 0; col < board[row].length - 3; col++) {
+        if (board[row][col] !== null && board[row][col] === board[row+1][col+1] === board[row+2][col+2] === board[row+3][col+3]) {
+          console.log('diagonalwin' , board[row][col])
+          if (board[row][col]) {
+            return 'Red';
+          } else if (board[row][col] !== null){
+            return 'Black';
+          }
+        }
+      }
+    }
     return false;
   }
 
@@ -106,23 +92,21 @@ class App extends React.Component {
   }
 
   checkForRowWin() {
-    this.state.board.forEach( row => {
-      let counterRed = 0;
-      let counterBlack = 0;
-      row.forEach( space => {
-        if (space === true) {
-          counterRed++;
-        } else if (space === false) {
-          counterBlack++;
+    let board = this.state.board;
+    for (let row = 0; row < board.length - 3; row++) {
+      for (let col = 0; col < board.length[row] - 3; c++) {
+        if (board[row][col]) {
+          if (board[row][col] !== null && board[row][col] === board[row][col + 1] === board[row][col + 2] === board[row][col + 3]) {
+            console.log('rowWin' , board[row][col])
+            if (board[row][col]) {
+              return 'Red';
+            } else {
+              return 'Black';
+            }
+          }
         }
-        if (counterBlack === 4) {
-          //DO SOME WINNER THING!!!!
-          return 'Black'
-        } else if (counterRed === 4) {
-          return 'Red'
-        }
-      })
-    });
+      }
+    }
   }
 
   handleClick(e){
@@ -172,6 +156,7 @@ class App extends React.Component {
         <div className = "board">
           <BoardView className = "boardView" board={this.state.board} />
         </div>
+        <div className = 'message'>{this.state.message}</div>
       </div>
     )
   }

@@ -25,3 +25,7 @@
 .black {
   background-color: black;
 }
+
+.message {
+  font-size: 30px;
+}
