@@ -19,8 +19,9 @@ body{
   background-image: url('https://gobamgo.com/wp-content/uploads/2015/12/BowlingLane.jpg');
   background-size: cover;
   background-position: fixed center;
-  color: blue;
-  font-size: 25px
+  color:black;
+  text-shadow: 2px 2px white;
+  font-size: 40px
 }
 
 .space {

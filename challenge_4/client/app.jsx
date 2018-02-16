@@ -14,14 +14,12 @@ class App extends React.Component {
         //currentframe:
         currentFrame: [],
         frames: 10,
-        frameThrows: 2
       },
       player2: {
         score: 0,
         moves: [],
         currentFrame: [],
         frames: 10,
-        frameThrows: 2
       },
       currentTurn: true,
       message: ''
@@ -39,20 +37,21 @@ class App extends React.Component {
     this.makeMove(pins, currentTurn);
   }
 
-  strike(player) {
-    this.state.message = "Strike!";
-    this.state[player].moves.push([10]);
-    this.state[player].frames--;
-    this.setState(this.state);
+  gameOver(){
+    this.setState({message: 'Game Over!'});
   }
 
   incrementTurn(player){
     let currentFrame = this.state[player].currentFrame;
     if (currentFrame[0] + currentFrame[1] === 10) {
-      this.state.message = "Spare!!!"
+      this.state.message = "Spare!!!";
+    } else if (currentFrame[0] === 10) {
+      this.state.message = "Strike!";
     }
     this.state[player].moves.push(currentFrame);
-    this.state[player].frames--;
+    if (this.state[player].frames !== 0) {
+      this.state[player].frames--;
+    }
     this.state[player].currentFrame = [];
     this.changeTurn();
     this.calculateScore(player);
@@ -90,23 +89,55 @@ class App extends React.Component {
   makeMove(pins, player){
     pins = Number(pins);
     let currentFrame = this.state[player].currentFrame;
-    if (currentFrame.length === 0) {
-      if (pins === 10) {        
-        this.strike(player);
-      } else {
+    let playerFrameCount = this.state[player].frames;
+    let strikeThrownInTenth = false;
+    let spareThrownInTenth = false;
+    // LAST FRAME ----------
+    if (playerFrameCount === 0) {
+      let frameSum = () => currentFrame.reduce( (acc, curr) => acc + curr, 0);
+      if (pins === 10 && currentFrame.length < 3) {
         currentFrame.push(pins);
-        this.state.message = `Knocked ${pins}!!!`
-        this.setState(this.state);
+        if (currentFrame.length === 3){
+          this.incrementTurn(player);
+          this.gameOver();
+        }
+        strikeThrownInTenth = true;
       }
-    } else if (currentFrame.length === 1) {
-      if ((pins + currentFrame[0]) > 10) {
-        this.setState({message: 'Too many pins! Try again.'})
-      } else {
-        this.state.message = `Knocked ${pins}!!!`
+      if (strikeThrownInTenth && currentFrame.length < 3) {
         currentFrame.push(pins);
-        this.incrementTurn(player);
-      }        
-    }  
+      }
+      else if (currentFrame.length < 2 && frameSum === 10) {
+        spareThrownInTenth = true;
+        if (spareThrownInTenth && currentFrame.length < 3){
+          currentFrame.push(pins);
+        }
+        if (currentFrame.length === 3) {
+          this.incrementTurn(player);
+          this.gameOver();
+        }
+      }
+      // END LAST FRAME -----
+    } else {
+      if (currentFrame.length === 0) {
+        if (pins === 10) {        
+          currentFrame.push(pins);
+          this.incrementTurn(player);
+        } else {
+          currentFrame.push(pins);
+          this.state.message = `Knocked ${pins}!!!`
+          this.setState(this.state);
+        }
+      } else if (currentFrame.length === 1) {
+        if ((pins + currentFrame[0]) > 10) {
+          this.state.message = 'Too many pins! Try again!!!';
+          this.setState(this.state);
+        } else {
+          this.state.message = `Knocked ${pins}!!!`
+          currentFrame.push(pins);
+          this.incrementTurn(player);
+        }        
+      }  
+    }
     this.setState(this.state);
   } //END MAKE MOVE
 
@@ -117,7 +148,7 @@ class App extends React.Component {
           <div className = "keyPad">
             <h1>Let's Bowl!</h1>
             <div>Player turn: {currentTurn}</div>        
-            {/* <div>Player frames left: {this.state[this.state.currentTurn].frames}</div> */}
+            <div>Player frames left: {this.state[currentTurn].frames}</div>
             <KeyPad handleClick={(e) => this.handleClick(e)}/>
             <div className ="message">{this.state.message}</div>
           </div>          
