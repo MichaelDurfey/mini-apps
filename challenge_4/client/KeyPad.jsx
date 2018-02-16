@@ -14,10 +14,15 @@ class KeyPad extends React.Component {
     }
   }
 
+  handleUpdate(){
+    this.props.handleClick(this.state.currentMove);
+    this.setState({currentMove: 0})
+  }
+
   render() {
     return (
       <div >
-        <div value ={this.state.currentMove}>{this.state.currentMove}</div>
+        <div value ={this.state.currentMove}>Pins to knock: {this.state.currentMove}</div>
         <table onClick ={(e) => this.handleClick(e)}>
           <tbody className = "keyPadTable">
             <tr>
@@ -40,7 +45,7 @@ class KeyPad extends React.Component {
             </tr>
           </tbody>
         </table>
-        <button onClick={() => this.props.handleClick(this.state.currentMove)}value ="MakeMove">Knock pins!</button>      
+        <button onClick={() => this.handleUpdate()}value ="MakeMove">Knock pins!</button>      
       </div>
     )
   }

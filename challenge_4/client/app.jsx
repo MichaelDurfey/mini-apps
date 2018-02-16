@@ -23,75 +23,106 @@ class App extends React.Component {
         frames: 10,
         frameThrows: 2
       },
-      currentTurn: "player1",
+      currentTurn: true,
       message: ''
       //true = Player1
     };
   }
 
-  handleClick(pins){
-    let currentTurn = this.state.currentTurn;
-    if (this.state[currentTurn].currentFrame.length < 2) {
-      this.makeMove(pins, currentTurn);
-    }
-  }
-
-  strike() {
-    //10 pins + pins for next two balls thrown
-  }
-
-  spare() {
-    // 10 pins + pins for next ball thrown
-  }
-
   changeTurn() {
     let currentTurn = this.state.currentTurn;
-    if (currentTurn === 'player1'){
-      this.setState({currentTurn: 'player2'});
-    } else {
-      this.setState({currentTurn: 'player1'});
+    this.state.currentTurn = !this.state.currentTurn;
+  }
+
+  handleClick(pins){
+    let currentTurn = this.state.currentTurn === true ? 'player1' : 'player2';
+    this.makeMove(pins, currentTurn);
+  }
+
+  strike(player) {
+    this.state.message = "Strike!";
+    this.state[player].moves.push([10]);
+    this.state[player].frames--;
+    this.setState(this.state);
+  }
+
+  incrementTurn(player){
+    let currentFrame = this.state[player].currentFrame;
+    if (currentFrame[0] + currentFrame[1] === 10) {
+      this.state.message = "Spare!!!"
     }
+    this.state[player].moves.push(currentFrame);
+    this.state[player].frames--;
+    this.state[player].currentFrame = [];
+    this.changeTurn();
+    this.calculateScore(player);
+  }
+
+  calculateScore(player) {
+    let playerMoves = this.state[player].moves;
+    let score = 0;
+
+    for (let i =0; i< playerMoves.length; i++) {
+      let frameSum = (i) => playerMoves[i].reduce( (acc, curr) => acc + curr, 0);
+      if (playerMoves[i].length === 1 && frameSum(i) === 10) {
+        // start another loop and see if next values are 10
+        if (playerMoves[i+1]){
+          score += (frameSum(i) + frameSum(i+1));
+        } else {
+          score += (frameSum(i));
+        }
+        //if next value is 10 keep incrementing until it's not
+        //if it's not, set initial value to the total of the next two throws
+      } else if (playerMoves[i].length === 2 && frameSum(i) === 10) {
+        if (playerMoves[i+1]) {
+          score += (frameSum(i) + playerMoves[i+1][0]);
+        } else {
+          score += (frameSum(i));
+        }
+      } else if (playerMoves[i].length === 2 && frameSum(i) < 10) {
+        score += (frameSum(i));
+      }
+    }
+    this.state[player].score = score;
+    this.setState(this.state);
   }
 
   makeMove(pins, player){
+    pins = Number(pins);
     let currentFrame = this.state[player].currentFrame;
-    console.log(currentFrame);
-    if (currentFrame.length < 1) {
-      //if 10
-      if (pins === 10) {
-        this.state.message = "Strike!"
-        this.state[player].moves.push([pins]);
-        this.state[player].frames--;
-        this.setState(this.state);
-        //handle strike
-        //if pin
-      } else if (currentFrame.length === 1) {
-        //if currentFrame.length < 2
+    if (currentFrame.length === 0) {
+      if (pins === 10) {        
+        this.strike(player);
+      } else {
         currentFrame.push(pins);
-      } else if (currentFrame.length === 2) {
-        //if currentFrame.length === 2
-          //push currentFrame into moves array for player
-          this.state[player].moves.push(currentFrame);  
-          //push pin num to currentFrame
-        
+        this.state.message = `Knocked ${pins}!!!`
+        this.setState(this.state);
       }
-
-    }
-      currentFrame = [];
-      this.setState(this.state);  
+    } else if (currentFrame.length === 1) {
+      if ((pins + currentFrame[0]) > 10) {
+        this.setState({message: 'Too many pins! Try again.'})
+      } else {
+        this.state.message = `Knocked ${pins}!!!`
+        currentFrame.push(pins);
+        this.incrementTurn(player);
+      }        
+    }  
+    this.setState(this.state);
   } //END MAKE MOVE
 
   render() {
+    let currentTurn = this.state.currentTurn === true ? 'player1' : 'player2';
     return (
       <div className ='container'>
           <div className = "keyPad">
             <h1>Let's Bowl!</h1>
-            <p>Hit the number of pins you'd like to knock down and press go</p>
+            <div>Player turn: {currentTurn}</div>        
+            {/* <div>Player frames left: {this.state[this.state.currentTurn].frames}</div> */}
             <KeyPad handleClick={(e) => this.handleClick(e)}/>
-          </div>
-          <div className ="message">{this.state.message}</div>
+            <div className ="message">{this.state.message}</div>
+          </div>          
           <div className = "scoreCard">
-            <ScoreCard p1score={this.state.player1Score} p2score={this.state.player2Score}/>
+            <ScoreCard p1score={this.state.player1.score} p2score={this.state.player2.score}/>
           </div>
       </div>
     )
